@@ -117,6 +117,14 @@
                 width: auto;
             }
         }
+
+        /* Prevent text selection across the page */
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -137,7 +145,49 @@
     </div>
 
     <script>
+        // Disable right-click menu
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Disable F12, Ctrl+U, and Developer Tools shortcuts
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl + U (View Source)
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl + Shift + I (Dev Tools)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I' || e.keyCode === 73)) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl + Shift + J (Console)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J' || e.keyCode === 74)) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl + Shift + C (Element Inspector)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'c' || e.key === 'C' || e.keyCode === 67)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
         let currentAnswer = 0;
+
+        // Function to speak text using the Web Speech API
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech so sentences don't overlap
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utterance);
+            }
+        }
 
         // Function to generate a random number between a min and max
         function getRandomInt(min, max) {
@@ -199,13 +249,19 @@
                 feedbackEl.innerText = "🎉 Fantastic! That is correct.";
                 feedbackEl.className = "feedback correct";
                 
+                // Play correct audio
+                speak("Congratulations, you are correct");
+
                 // Show next button, hide submit, disable input
                 document.getElementById('submit-btn').style.display = "none";
                 document.getElementById('next-btn').style.display = "inline-block";
                 document.getElementById('answer-input').disabled = true;
             } else {
-                feedbackEl.innerText = "Not quite! Check your borrowing and try again.";
+                feedbackEl.innerText = "Not quite. Solve it once again!";
                 feedbackEl.className = "feedback incorrect";
+                
+                // Play incorrect audio
+                speak("Not quite. Solve it once again");
             }
         }
 
